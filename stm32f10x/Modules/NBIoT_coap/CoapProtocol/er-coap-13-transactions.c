@@ -40,7 +40,7 @@
 
 #include "er-coap-13.h"
 #include "er-coap-13-transactions.h"
-#include "list.h"
+#include "coap_list.h"
 
 /*
  * Modulo mask (+1 and +0.5 for rounding) for a random number to get the tick number for the random

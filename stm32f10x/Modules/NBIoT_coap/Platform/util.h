@@ -16,7 +16,7 @@ extern "C"
 #endif 
 
 #include <stdint.h>
-#include <pthread.h>
+//#include <pthread.h>
 
 
 typedef void *(*ThreadFun_t)(void *arg);

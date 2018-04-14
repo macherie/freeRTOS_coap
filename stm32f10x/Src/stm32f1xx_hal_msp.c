@@ -92,6 +92,33 @@ void HAL_MspInit(void)
 }
 
 /* USER CODE BEGIN 1 */
+void HAL_UART_MspInit(UART_HandleTypeDef *huart)
+{
+    GPIO_InitTypeDef  GPIO_InitStruct;
+
+
+    if (USART1 == huart->Instance){
+      
+    }else if (USART3 == huart->Instance){
+        /* Enable GPIO TX/RX clock */
+        __HAL_RCC_GPIOB_CLK_ENABLE();
+        
+        /* Enable USARTx clock */
+        __HAL_RCC_USART3_CLK_ENABLE();
+
+        /* UART TX GPIO pin configuration  */
+        GPIO_InitStruct.Pin       = GPIO_PIN_10;
+        GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+        GPIO_InitStruct.Pull      = GPIO_PULLUP;
+        GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_HIGH;
+        HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+        /* UART RX GPIO pin configuration  */
+        GPIO_InitStruct.Pin   = GPIO_PIN_11;
+        GPIO_InitStruct.Mode  = GPIO_MODE_AF_INPUT;
+        HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    }
+}
 
 /* USER CODE END 1 */
 

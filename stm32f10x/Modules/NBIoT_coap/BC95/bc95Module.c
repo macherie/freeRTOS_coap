@@ -77,7 +77,7 @@ static int bc95StringSend(const char str[])
  * @see         
  * @note        
  */
-static int bc95StringRecv(char data[], uint16_t size)
+static int bc95StringRecv(uint8_t data[], uint16_t size)
 {
 	int recvLen, retFun = 0; 
 
@@ -240,7 +240,7 @@ static CMDStatus_t msgArrived(uint32_t outtime_ms)
 static CMDStatus_t atcmd_fedback(const char cmd[], uint32_t outtime_ms)
 {
 	CMDStatus_t retVal = ATCMD_ERROR;
-	int retFun, recvdLen;
+	int retFun;
 
 	/* send data */
 	retFun = bc95StringSend(cmd);
@@ -277,12 +277,12 @@ static int msgReceive(uint8_t socket, uint16_t recvLen)
     /* Received Length */
     uint16_t start, end;
     uint32_t recvdLen;
-    retVal = getStringbyDot(gTxRxBuffer, 3, &start, &end);
+    retVal = getStringbyDot((char *)gTxRxBuffer, 3, &start, &end);
     if (retVal < 0) {
         LOG("Get String by Dot Error.\n");
         return 0;
     }
-    retVal = strdec2dec_uint32(gTxRxBuffer + start, end - start, &recvdLen);
+    retVal = strdec2dec_uint32((char *)gTxRxBuffer + start, end - start, &recvdLen);
     if (retVal != 0){
         LOG("String to Hec Error\n");
         return 0;
@@ -302,7 +302,7 @@ static int msgReceive(uint8_t socket, uint16_t recvLen)
 static CMDStatus_t atcmd_result(const char cmd[], uint32_t timeout_ms, char dataBuffer[], uint16_t size)
 {
     CMDStatus_t retVal = ATCMD_ERROR;
-	int retFun, recvdLen, idx;
+	int retFun;
 
     /* send data */
 	retFun = bc95StringSend(cmd);
@@ -578,7 +578,7 @@ int bc95_sendMsg(int socket, const char ip[], uint16_t port, const  uint8_t msg[
     CMDStatus_t retFun;
 
     /* serialize */
-    bufferLen = snprintf(gTxRxBuffer, sizeof(gTxRxBuffer), "AT+%s=%u,%s,%u,%u,", BC95_NSOST, socket, ip, port, msgLen);
+    bufferLen = snprintf((char *)gTxRxBuffer, sizeof(gTxRxBuffer), "AT+%s=%u,%s,%u,%u,", BC95_NSOST, socket, ip, port, msgLen);
     allBufferLen = bufferLen + msgLen * 2 + 2;
     if (allBufferLen > sizeof(gTxRxBuffer)){
         LOG("TxRxBuffer too Small\n");

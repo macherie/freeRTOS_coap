@@ -135,7 +135,7 @@ int coapClientParse(uint8_t payload[], uint16_t payloadSize, uint8_t msgBuffer[]
     int retFun = 0;
     coap_status_t erbium_status_code;
     const uint8_t *payloadPtr = NULL;
-    uint16_t copyLen;
+    //uint16_t copyLen;
 
     /* Parse Message */
     erbium_status_code = coap_parse_message(gCtx.rsp, msgBuffer, msgSize);

@@ -6,10 +6,21 @@
  * @date     2018.03.17 
  * @par Copyright (c):  RoomBanker Intelligent System CO.,LTD. 
  */
-#include <unistd.h>
-#include <sys/time.h>
 
 #include "util.h"
+
+#ifdef _unix_
+#include <unistd.h>
+#include <sys/time.h>
+#endif
+
+#ifdef _FREERTOS_
+#endif
+
+
+
+
+
 
 
 /*  
@@ -22,11 +33,15 @@
  */
 void nb_delay(uint32_t delay_ms)
 {
+#ifdef _unix_
   struct timeval tv;
-
   tv.tv_sec = delay_ms / 1000;
   tv.tv_usec = (delay_ms % 1000) * 1000;
   select(0, NULL, NULL, NULL, &tv);
+#else
+  TickType_t ticks = delay_ms / portTICK_PERIOD_MS;
+  vTaskDelay(ticks ? ticks : 1);          
+#endif
 }
 
 /*  

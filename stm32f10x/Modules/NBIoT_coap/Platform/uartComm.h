@@ -22,7 +22,7 @@ int uartComm_getData(uint8_t data[], uint16_t size);
 
 int uartComm_sendData(const uint8_t data[], uint16_t size);
 
-int uartComm_recv(void);
+int uartComm_recv(uint8_t data[], uint16_t len);
 
 int uartComm_init(void);
 

@@ -66,8 +66,8 @@
  *
  * $Id: list.h,v 1.5 2010/09/13 13:31:00 adamdunkels Exp $
  */
-#ifndef __LIST_H__
-#define __LIST_H__
+#ifndef __COAP_LIST_H__
+#define __COAP_LIST_H__
 
 #define LIST_CONCAT2(s1, s2) s1##s2
 #define LIST_CONCAT(s1, s2) LIST_CONCAT2(s1, s2)

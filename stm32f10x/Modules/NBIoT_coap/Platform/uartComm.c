@@ -8,8 +8,15 @@
  */
 
 #include "log.h"
-#include "serial.h"
 #include "myRingQueue.h"
+
+#ifdef _unix_
+#include "serial.h"
+#endif
+
+#ifdef USE_HAL_DRIVER
+#include "coap_uart.h"
+#endif
 
 
 #define UARTCOMM_DEBUG			(1)
@@ -23,8 +30,10 @@ typedef struct{
 }UartComm_ctx_t;
 
 
-static UartComm_ctx_t gCtx;
+#ifdef _unix_
 static const char gSerialDev[] = "/dev/ttyUSB0";
+#endif
+static UartComm_ctx_t gCtx;
 static char gRingRecvBuffer[RING_SIZE];
 
 
@@ -38,7 +47,12 @@ static char gRingRecvBuffer[RING_SIZE];
  */
 static int uartInit(void)
 {
+#ifdef _unix_
 	gCtx.serialFd = serial_open(gSerialDev, NBIOT_UART_BAUDRATE);
+#endif
+#ifdef USE_HAL_DRIVER
+    
+#endif
 	return gCtx.serialFd;
 }
 
@@ -64,16 +78,16 @@ static int ringRecvInit (ringQueue_t *ringPtr)
  * @see         
  * @note        
  */
-int uartComm_recv(void)
+int uartComm_recv(uint8_t data[], uint16_t len)
 {
-	uint8_t buffer[64];
 	int retFun, idx;
+	
+#ifdef _unix_
+	uint8_t buffer[64];
 	retFun = serial_read(gCtx.serialFd, buffer, sizeof(buffer), 0);
 	if (retFun > 0){
-		for(idx = 0;idx < retFun;idx++)
-		{
-			if (enQueue(&gCtx.ringRecv, buffer[idx]) == 0)
-			{
+		for(idx = 0;idx < retFun;idx++){
+			if (enQueue(&gCtx.ringRecv, buffer[idx]) == 0){
 				LOGERROR("Ring Full\n");	
 				return idx;
 			}
@@ -81,6 +95,15 @@ int uartComm_recv(void)
 	}else{
 		retFun = 0;
 	}
+#else
+	retFun = len;
+	for(idx = 0;idx < retFun;idx++){
+		if (enQueue(&gCtx.ringRecv, data[idx]) == 0){
+			LOGERROR("Ring Full\n");	
+			return idx;
+		}
+	}
+#endif
 	return retFun;
 }
 
@@ -98,10 +121,8 @@ int uartComm_getData(uint8_t data[], uint16_t size)
 	uint8_t temp;
 	
 	getLen = lenQueue(&gCtx.ringRecv);
-	if (getLen > 0)
-	{
-		for(idx = 0;idx < getLen && idx < size;idx++)
-		{
+	if (getLen > 0){
+		for(idx = 0;idx < getLen && idx < size;idx++){
 			popQueue(&gCtx.ringRecv, &temp);		/* get data from ring byte by byte */
 			data[idx] = temp;
 		}
@@ -132,8 +153,7 @@ int uartComm_sendData(const uint8_t data[], uint16_t size)
 
 #endif
 	retFun = serial_write(gCtx.serialFd, (const char *)data, size, 10); 
-	if (retFun < 0)
-	{
+	if (retFun < 0){
 		retFun = 0;
 	}
 	return retFun;
@@ -151,8 +171,7 @@ int uartComm_init(void)
 {
 	int  retFunc, retVal = 1;
 	retFunc = uartInit();
-	if (retFunc > 0)
-	{
+	if (retFunc > 0){
 		ringRecvInit(&gCtx.ringRecv);
 		retVal = 0;
 	}

@@ -40,7 +40,7 @@
 #define COAP_13_H_
 
 #include <string.h>
-#include <strings.h>
+//#include <strings.h>
 #include <stdlib.h>
 #include <stdint.h>
 
