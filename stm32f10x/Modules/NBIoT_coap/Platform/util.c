@@ -9,18 +9,10 @@
 
 #include "util.h"
 
-#ifdef _unix_
+#if defined (_unix_)
 #include <unistd.h>
 #include <sys/time.h>
 #endif
-
-#ifdef _FREERTOS_
-#endif
-
-
-
-
-
 
 
 /*  
@@ -33,12 +25,12 @@
  */
 void nb_delay(uint32_t delay_ms)
 {
-#ifdef _unix_
+#if defined (_unix_)
   struct timeval tv;
   tv.tv_sec = delay_ms / 1000;
   tv.tv_usec = (delay_ms % 1000) * 1000;
   select(0, NULL, NULL, NULL, &tv);
-#else
+#elif defined (_FREERTOS_)
   TickType_t ticks = delay_ms / portTICK_PERIOD_MS;
   vTaskDelay(ticks ? ticks : 1);          
 #endif
@@ -167,7 +159,7 @@ int strdec2dec_uint32(const char *str, unsigned int size, unsigned int *value)
     }
     
     int idx;
-    unsigned int dec[32], decValue = 0;
+    unsigned int decValue = 0;
 
     for (idx = 0; idx < size;idx++)
     {
@@ -216,13 +208,15 @@ int mysscan_uint(const char str[], unsigned int *valuePtr)
  * @see         
  * @note        
  */
- int createThread(int32_t *threadId, ThreadFun_t threadFun, void *arg)
- {
-	pthread_t pthreadID;
-	int retFun;
-	
+int createThread(int32_t *threadId, ThreadFun_t threadFun, void *arg)
+{
+#if defined (_unix_)
+    pthread_t pthreadID;
 	return pthread_create(&pthreadID, NULL, threadFun, arg);
- }
+#elif defined (_FREERTOS_)
+    return xTaskCreate(threadFun, "NBIoT", 1024, NULL, 2, NULL);
+#endif
+}
 
 /*  
  * @brief      create Mutex 
@@ -234,7 +228,13 @@ int mysscan_uint(const char str[], unsigned int *valuePtr)
  */
 int mutexInit(Mutex_t *mutex)
 {
+#if defined (_unix_)
+    vSemaphoreCreateBinary();
    return pthread_mutex_init(mutex, NULL);
+#elif defined (_FREERTOS_)
+   *mutex = vSemaphoreCreateBinary();
+   return 0;
+#endif
 }
 
 /*  
@@ -247,7 +247,12 @@ int mutexInit(Mutex_t *mutex)
  */
 int mutexLock(Mutex_t *mutex)
 {
+#if defined (_unix_)
     return pthread_mutex_lock(mutex);
+#elif defined (_FREERTOS_)
+    if (xSemaphoreTake(*mutex, portMAX_DELAY) != )
+    return 0;
+#endif
 }
 
 
@@ -261,7 +266,11 @@ int mutexLock(Mutex_t *mutex)
  */
 int mutexUnlock(Mutex_t *mutex)
 {
-    return pthread_mutex_unlock(mutex); 
+#if defined (_unix_)
+    return pthread_mutex_unlock(mutex);
+#elif defined (_FREERTOS_)
+    
+#endif
 }
 
 /*  

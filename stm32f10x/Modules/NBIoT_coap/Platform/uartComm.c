@@ -30,11 +30,8 @@ typedef struct{
 }UartComm_ctx_t;
 
 
-#ifdef _unix_
-static const char gSerialDev[] = "/dev/ttyUSB0";
-#endif
 static UartComm_ctx_t gCtx;
-static char gRingRecvBuffer[RING_SIZE];
+static uint8_t gRingRecvBuffer[RING_SIZE];
 
 
 /*  
@@ -47,11 +44,12 @@ static char gRingRecvBuffer[RING_SIZE];
  */
 static int uartInit(void)
 {
-#ifdef _unix_
+#if defined _unix_
+	static const char gSerialDev[] = "/dev/ttyUSB0";
 	gCtx.serialFd = serial_open(gSerialDev, NBIOT_UART_BAUDRATE);
-#endif
-#ifdef USE_HAL_DRIVER
-    
+#elif defined USE_HAL_DRIVER
+    coapUartInit(NBIOT_UART_BAUDRATE);
+	gCtx.serialFd = 1;
 #endif
 	return gCtx.serialFd;
 }
@@ -78,11 +76,10 @@ static int ringRecvInit (ringQueue_t *ringPtr)
  * @see         
  * @note        
  */
-int uartComm_recv(uint8_t data[], uint16_t len)
+int uartComm_recv(void)
 {
-	int retFun, idx;
-	
-#ifdef _unix_
+	int retFun = 0, idx = 0;
+#if defined _unix_
 	uint8_t buffer[64];
 	retFun = serial_read(gCtx.serialFd, buffer, sizeof(buffer), 0);
 	if (retFun > 0){
@@ -95,14 +92,16 @@ int uartComm_recv(uint8_t data[], uint16_t len)
 	}else{
 		retFun = 0;
 	}
-#else
-	retFun = len;
-	for(idx = 0;idx < retFun;idx++){
-		if (enQueue(&gCtx.ringRecv, data[idx]) == 0){
+#elif defined USE_HAL_DRIVER
+	uint8_t temp;
+	while(coapUartRecv(&temp, 1)){
+		idx++;
+		if (enQueue(&gCtx.ringRecv, temp) == 0){
 			LOGERROR("Ring Full\n");	
 			return idx;
 		}
 	}
+	retFun = idx;
 #endif
 	return retFun;
 }
@@ -140,19 +139,17 @@ int uartComm_getData(uint8_t data[], uint16_t size)
  * @see         
  * @note        
  */
-int uartComm_sendData(const uint8_t data[], uint16_t size)
+int uartComm_sendData(uint8_t data[], uint16_t size)
 {
-	int retFun;
+	int retFun = 0;
 
-#if (UARTCOMM_DEBUG == 1)
-	char temp[128];
-    int printLen;
+	LOGDEBUG(UARTCOMM_DEBUG, "Send[%d]:%s\n",size, data);
 
-	printLen = snprintf(temp,sizeof(temp),"%s",data);
-	LOGDEBUG(1, "Send[%d]:%s\n",printLen, temp);
-
-#endif
+#if defined _unix_
 	retFun = serial_write(gCtx.serialFd, (const char *)data, size, 10); 
+#elif defined USE_HAL_DRIVER
+	retFun = coapUartSend(data, size);
+#endif
 	if (retFun < 0){
 		retFun = 0;
 	}

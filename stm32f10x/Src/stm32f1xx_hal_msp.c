@@ -64,7 +64,7 @@ void HAL_MspInit(void)
 
   __HAL_RCC_AFIO_CLK_ENABLE();
 
-  HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
+  HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_2);
 
   /* System interrupt init*/
   /* MemoryManagement_IRQn interrupt configuration */
@@ -96,9 +96,26 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 {
     GPIO_InitTypeDef  GPIO_InitStruct;
 
-
     if (USART1 == huart->Instance){
+        __HAL_RCC_GPIOA_CLK_ENABLE();
       
+        /* UART TX GPIO pin configuration  */
+        GPIO_InitStruct.Pin       = GPIO_PIN_9;
+        GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+        GPIO_InitStruct.Pull      = GPIO_PULLUP;
+        GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_HIGH;
+        HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+        /* UART RX GPIO pin configuration  */
+        GPIO_InitStruct.Pin       = GPIO_PIN_10;
+        GPIO_InitStruct.Mode      = GPIO_MODE_INPUT;
+        HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    
+        /* NVIC for USART */
+        //HAL_NVIC_SetPriority(USART1_IRQn, 3, 2);
+        //HAL_NVIC_EnableIRQ(USART1_IRQn);
+        
+        __HAL_RCC_USART1_CLK_ENABLE();
     }else if (USART3 == huart->Instance){
         /* Enable GPIO TX/RX clock */
         __HAL_RCC_GPIOB_CLK_ENABLE();
@@ -120,7 +137,6 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
     }
 }
 
-/* USER CODE END 1 */
 
 /**
   * @}

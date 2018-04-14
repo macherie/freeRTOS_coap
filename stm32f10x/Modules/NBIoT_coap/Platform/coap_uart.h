@@ -16,9 +16,9 @@ extern "C"
 #endif 
 
 
-void coapUartInit(void);
+void coapUartInit(uint32_t baud);
 
-int coapUartSend(uint8_t data[], uint16_t dataLen);
+int coapUartSend(uint8_t data[], uint16_t len);
 
 int coapUartRecv(uint8_t data[], uint16_t len);
 

@@ -6,6 +6,16 @@
  * @date     
  * @par Copyright (c):  RoomBanker Intelligent System CO.,LTD. 
  */
+ 
+
+#include "stm32f1xx_hal.h"
+
+
+#define UARTX_COAP		(USART1)
+ 
+ 
+static UART_HandleTypeDef UartHandle;
+
 
 /*  
  * @brief        
@@ -15,9 +25,18 @@
  * @see         
  * @note        
  */
-void coapUartInit(void)
+void coapUartInit(uint32_t baud)
 {
-	/* TODO */
+	UartHandle.Instance        = UARTX_COAP;
+
+	UartHandle.Init.BaudRate   = baud;
+	UartHandle.Init.WordLength = UART_WORDLENGTH_8B;
+	UartHandle.Init.StopBits   = UART_STOPBITS_1;
+	UartHandle.Init.Parity     = UART_PARITY_NONE;
+	UartHandle.Init.HwFlowCtl  = UART_HWCONTROL_NONE;
+	UartHandle.Init.Mode       = UART_MODE_TX_RX;
+  
+	HAL_UART_Init(&UartHandle);
 }
 
 /*  
@@ -30,8 +49,11 @@ void coapUartInit(void)
  */
 int coapUartSend(uint8_t data[], uint16_t dataLen)
 {
-	/* TODO */
-	return 0;
+	if (HAL_UART_Transmit(&UartHandle, data, dataLen, 0xffff) != HAL_OK);
+	{
+		return 0;
+	}
+	return dataLen;
 }
 
 /*  
@@ -44,7 +66,10 @@ int coapUartSend(uint8_t data[], uint16_t dataLen)
  */
 int coapUartRecv(uint8_t data[], uint16_t size)
 {
-	/* TODO */
-	return 0;
+	if (HAL_UART_Receive(&UartHandle, data, size, 0xff) != HAL_OK)
+	{
+		return 0;
+	}
+	return 1;
 }
 

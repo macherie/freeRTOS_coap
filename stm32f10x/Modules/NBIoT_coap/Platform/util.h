@@ -16,11 +16,24 @@ extern "C"
 #endif 
 
 #include <stdint.h>
-//#include <pthread.h>
+#if defined (_unix_)
+#include <pthread.h>
+#elif defined (_FREERTOS_)
+#include "FreeRTOS.h"
+#include "task.h"
+#include "timers.h"
+#include "queue.h"
+#include "semphr.h"
+#endif
 
 
+#if defined (_unix_)
 typedef void *(*ThreadFun_t)(void *arg);
 typedef pthread_mutex_t Mutex_t ;
+#elif defined (_FREERTOS_)
+typedef void (ThreadFun_t)(void *arg);
+typedef SemaphoreHandle_t Mutex_t;
+#endif
 
 
 void nb_delay(uint32_t delay_ms);

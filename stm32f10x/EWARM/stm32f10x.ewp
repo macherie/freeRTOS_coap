@@ -221,6 +221,7 @@
                     <name>CCDefines</name>
                     <state>USE_HAL_DRIVER</state>
                     <state>STM32F103xE</state>
+                    <state>_FREERTOS_</state>
                 </option>
                 <option>
                     <name>CCPreprocFile</name>
@@ -1053,6 +1054,9 @@
             <file>
                 <name>$PROJ_DIR$\..\Src\stm32f1xx_it.c</name>
             </file>
+            <file>
+                <name>$PROJ_DIR$\..\Src\uart_test.c</name>
+            </file>
         </group>
     </group>
     <group>
@@ -1151,6 +1155,24 @@
             <name>log</name>
             <file>
                 <name>$PROJ_DIR$\..\Modules\log\log.c</name>
+            </file>
+        </group>
+        <group>
+            <name>NBIoT</name>
+            <file>
+                <name>$PROJ_DIR$\..\Modules\NBIoT_coap\Platform\coap_uart.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Modules\NBIoT_coap\Platform\crc_cal.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Modules\NBIoT_coap\Platform\myRingQueue.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Modules\NBIoT_coap\Platform\uartComm.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Modules\NBIoT_coap\Platform\util.c</name>
             </file>
         </group>
     </group>

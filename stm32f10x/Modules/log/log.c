@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#include "privatePrintf.h"
+#include "log.h"
 #include "stm32f1xx_hal.h"
+
+
+#define DEBUG_UART_BAUDRATE     (115200)
 
 
 static char printfbuffer[512];
@@ -13,7 +16,7 @@ static void uart3Init(void)
 {
   UartHandle.Instance        = USART3;
 
-  UartHandle.Init.BaudRate   = 115200;
+  UartHandle.Init.BaudRate   = DEBUG_UART_BAUDRATE;
   UartHandle.Init.WordLength = UART_WORDLENGTH_8B;
   UartHandle.Init.StopBits   = UART_STOPBITS_1;
   UartHandle.Init.Parity     = UART_PARITY_NONE;
@@ -40,7 +43,7 @@ int priPrintf(const char *format,...)
 	va_list ap;
 	
 	va_start(ap, format);
-	chars = vsnprintf(printfbuffer, sizeof(printfbuffer),format,ap);
+	chars = vsnprintf(printfbuffer, sizeof(printfbuffer), format, ap);
 	va_end(ap);
     putstring(printfbuffer, chars);
 	
