@@ -20,7 +20,7 @@ extern "C"
 
 
 typedef void (*CmdHandlerFunc_t)(uint8_t cmd, const uint8_t data[], uint16_t dataLen);    /* 命令处理函数 */
-typedef void (*CmdErrHandlerFunc_t)(uint8_t cmd);                                       /* 错误处理函数 */
+typedef void (*CmdErrHandlerFunc_t)(uint8_t cmd);                                         /* 错误处理函数 */
 
 
 int nbInit(CmdHandlerFunc_t cmdHandlerFunc, CmdErrHandlerFunc_t errorHandlerFunc);

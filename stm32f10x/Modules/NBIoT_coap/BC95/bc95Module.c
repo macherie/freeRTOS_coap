@@ -16,7 +16,7 @@
 
 
 #define BC95MODULE_DEBUG		(1)
-#define BC95TXRX_BUFFER_SIZE    (512)
+#define BC95TXRX_BUFFER_SIZE    (256)
 #define CMD_SIZE				(64)
 
 /* BC95 AT CMD */
@@ -50,7 +50,7 @@ typedef struct
 }NbiotCtx_t;
 
 
-static NbiotCtx_t gCtx;
+//static NbiotCtx_t gCtx;
 static uint8_t gTxRxBuffer[BC95TXRX_BUFFER_SIZE];
 
 
@@ -62,11 +62,11 @@ static uint8_t gTxRxBuffer[BC95TXRX_BUFFER_SIZE];
  * @see         
  * @note        
  */
-static int bc95StringSend(const char str[])
+static int bc95StringSend(char str[])
 {
 	int size = strlen(str);	
 
-	return uartComm_sendData((const uint8_t *)str, size);
+	return uartComm_sendData((uint8_t *)str, size);
 }
 
 /*  
@@ -167,6 +167,7 @@ static CMDStatus_t recv_fedback(uint32_t outtime_ms)
 {
     int retFun, recvdLen;
 
+    outtime_ms = outtime_ms / 100;
     for(recvdLen = 0;outtime_ms > 0;outtime_ms--)
 	{
 		retFun = bc95StringRecv(gTxRxBuffer + recvdLen, sizeof(gTxRxBuffer) - recvdLen - 1);
@@ -185,7 +186,7 @@ static CMDStatus_t recv_fedback(uint32_t outtime_ms)
 
             return ATCMD_ERROR;
         }
-        nb_delay(1);
+        nb_delay(100);
 	}
 	gTxRxBuffer[recvdLen]='\0';
 	LOGDEBUG(BC95MODULE_DEBUG, "No Matched.\n");
@@ -237,7 +238,7 @@ static CMDStatus_t msgArrived(uint32_t outtime_ms)
  * @see         
  * @note       after send cmd, check recieve message is ok or error. 
  */
-static CMDStatus_t atcmd_fedback(const char cmd[], uint32_t outtime_ms)
+static CMDStatus_t atcmd_fedback(char cmd[], uint32_t outtime_ms)
 {
 	CMDStatus_t retVal = ATCMD_ERROR;
 	int retFun;
@@ -299,7 +300,7 @@ static int msgReceive(uint8_t socket, uint16_t recvLen)
  * @see         
  * @note        
  */
-static CMDStatus_t atcmd_result(const char cmd[], uint32_t timeout_ms, char dataBuffer[], uint16_t size)
+static CMDStatus_t atcmd_result(char cmd[], uint32_t timeout_ms, char dataBuffer[], uint16_t size)
 {
     CMDStatus_t retVal = ATCMD_ERROR;
 	int retFun;
@@ -335,10 +336,10 @@ static CMDStatus_t atcmd_result(const char cmd[], uint32_t timeout_ms, char data
  * @see         
  * @note        
  */
-static CMDStatus_t atcmd_resultIsMatched(const char cmd[], uint32_t timeout_ms, char expectStr[][CMD_SIZE], uint16_t num)
+static CMDStatus_t atcmd_resultIsMatched(char cmd[], uint32_t timeout_ms, char expectStr[][CMD_SIZE], uint16_t num)
 {
     CMDStatus_t retVal = ATCMD_ERROR;
-	int retFun, recvdLen, idx;
+	int retFun, idx;
 
 	/* send data */
 	retFun = bc95StringSend(cmd);
@@ -359,7 +360,7 @@ static CMDStatus_t atcmd_resultIsMatched(const char cmd[], uint32_t timeout_ms, 
     /* parse data */
     for (idx = 0;idx < num;idx++)
     {
-        retFun = bfCmp(gTxRxBuffer, strlen(gTxRxBuffer), expectStr[idx],strlen(expectStr[idx]));
+        retFun = bfCmp(gTxRxBuffer, strlen((char *)gTxRxBuffer), (uint8_t *)expectStr[idx],strlen(expectStr[idx]));
         if (retFun != -1)
         {
             LOGDEBUG(BC95MODULE_DEBUG,"Result Matched\n");
@@ -382,7 +383,6 @@ static CMDStatus_t atcmd_resultIsMatched(const char cmd[], uint32_t timeout_ms, 
 static CMDStatus_t nbiot_moduleCMD(const char cmd[], uint32_t timeout_ms)
 {
 	char cmdBuffer[CMD_SIZE];
-	CMDStatus_t retVal = ATCMD_ERROR;
 
 	snprintf(cmdBuffer, sizeof(cmdBuffer),"AT+%s\r",cmd);
 	return atcmd_fedback(cmdBuffer, timeout_ms);
@@ -415,11 +415,10 @@ CMDStatus_t bc95_rest(void)
 CMDStatus_t bc95_noEcho(void)
 {
 	char cmdBuffer[CMD_SIZE];
-	CMDStatus_t retVal = ATCMD_ERROR;
 
 	snprintf(cmdBuffer,sizeof(cmdBuffer), "%s\r", BC95_ATE0);
 
-	return atcmd_fedback(cmdBuffer, 500);
+	return atcmd_fedback(cmdBuffer, 200);
 }
 
 /*  
@@ -525,8 +524,9 @@ CMDStatus_t bc95_CGSN(uint8_t snt, char dataBuffer[], uint16_t dataSize)
     snprintf(cmdBuffer, sizeof(cmdBuffer), "AT+%s=%u\r", BC95_CGSN, snt);
     retFun = atcmd_result(cmdBuffer, 500, dataBuffer, dataSize);
     if (ATCMD_OK != retFun) {
-        LOG("Can't Recieve "); 
+        LOG("Can't Recieve \n"); 
     }
+    return retFun;
 }
 
 /*  
@@ -574,7 +574,7 @@ int bc95_sendMsg(int socket, const char ip[], uint16_t port, const  uint8_t msg[
     int bufferLen;
     int allBufferLen;
     int idx;
-    uint8_t recvBuffer[CMD_SIZE];
+    char recvBuffer[CMD_SIZE];
     CMDStatus_t retFun;
 
     /* serialize */
@@ -586,13 +586,13 @@ int bc95_sendMsg(int socket, const char ip[], uint16_t port, const  uint8_t msg[
     }
 
     for (idx = 0;idx < msgLen ;idx++) {
-       bufferLen += snprintf(gTxRxBuffer + bufferLen, sizeof(gTxRxBuffer) - bufferLen,"%02X",msg[idx]); 
+       bufferLen += snprintf((char *)gTxRxBuffer + bufferLen, sizeof(gTxRxBuffer) - bufferLen,"%02X",msg[idx]); 
     }
     gTxRxBuffer[bufferLen++] = '\r';
     gTxRxBuffer[bufferLen++] = 0;
 
     /* send Message and Feedback */
-    retFun = atcmd_result(gTxRxBuffer, 500, recvBuffer, sizeof(recvBuffer));
+    retFun = atcmd_result((char *)gTxRxBuffer, 500, recvBuffer, sizeof(recvBuffer));
     if (ATCMD_OK != retFun) {
         LOG("Receive Error:%d\n", retFun);
         return 0;
@@ -637,12 +637,12 @@ int bc95_recvMsgPolling(uint8_t socket, uint8_t msg[], uint16_t msgSize, uint32_
     uint16_t start, end;
     uint32_t value;
     int ret;
-    ret = getStringbyDot(gTxRxBuffer, 1, &start, &end);
+    ret = getStringbyDot((char *)gTxRxBuffer, 1, &start, &end);
     if (ret < 1){
         LOG("Get String by Dot Error\n");
         return -2;
     }
-    ret = strdec2dec_uint32(gTxRxBuffer + start, end - start, &value);
+    ret = strdec2dec_uint32((char *)gTxRxBuffer + start, end - start, &value);
     if (ret != 0){
         LOG("String to Hec Error\n");
         return -4;
@@ -666,13 +666,13 @@ int bc95_recvMsgPolling(uint8_t socket, uint8_t msg[], uint16_t msgSize, uint32_
     /* message turn hex array */
     uint8_t hex;
     uint16_t idx;
-    ret = getStringbyDot(gTxRxBuffer, 4, &start, &end);
+    ret = getStringbyDot((char *)gTxRxBuffer, 4, &start, &end);
     if (ret < 1){
         LOG("Get String by Dot Error\n");
         return 0;
     }
     for (idx = 0;start < end;idx++, start += 2) {
-        strhex2hex_byte(gTxRxBuffer + start, 2, &hex);
+        strhex2hex_byte((char *)gTxRxBuffer + start, 2, &hex);
         msg[idx] = hex;
     }
     return idx;

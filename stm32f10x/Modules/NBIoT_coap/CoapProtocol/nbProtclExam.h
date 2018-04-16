@@ -19,8 +19,7 @@ extern "C"
 
 #include "nblockProtcl.h"
 
-#define NBLOCK_PROTCL_HEADER_SIZE   (18)
-#define NBLOCK_PROTCL_PAYLOAD_SIZE  (110)
+
 #define NBLOCK_RESPDATA_SIZE        NBLOCK_PROTCL_PAYLOAD_SIZE
 #define APPPROTCL_DATASIZE          (64)
 #define CMDSENDRECV_TIMEOUTMS       (10000)
@@ -190,9 +189,7 @@ int nblockProtcl_rspModAttr(const void *dataPtr, NblockFrame_t *frame, uint16_t 
 
 int nblockProtcl_rspQryAttr(const void *dataPtr, NblockFrame_t *frame, uint16_t timeOut_ms);
 
-
 int cmdAttachedFuncExe(uint8_t cmd, const void *dataPtr, NblockFrame_t *frame);
-
 
 
 #ifdef __cplusplus 

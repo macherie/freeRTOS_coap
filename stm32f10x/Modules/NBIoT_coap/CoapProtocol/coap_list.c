@@ -45,7 +45,7 @@
  *
  * $Id: list.c,v 1.5 2010/06/15 18:54:27 adamdunkels Exp $
  */
-#include "list.h"
+#include "coap_list.h"
 
 #define NULL 0
 

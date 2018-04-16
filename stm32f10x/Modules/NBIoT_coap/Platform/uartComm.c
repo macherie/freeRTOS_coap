@@ -146,7 +146,7 @@ int uartComm_sendData(uint8_t data[], uint16_t size)
 	LOGDEBUG(UARTCOMM_DEBUG, "Send[%d]:%s\n",size, data);
 
 #if defined _unix_
-	retFun = serial_write(gCtx.serialFd, (const char *)data, size, 10); 
+	retFun = serial_write(gCtx.serialFd, (char *)data, size, 10); 
 #elif defined USE_HAL_DRIVER
 	retFun = coapUartSend(data, size);
 #endif

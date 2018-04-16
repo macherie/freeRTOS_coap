@@ -21,6 +21,7 @@ extern "C"
 typedef enum{
     NBCTRL_NOTINITD = 0,
     NBCTRL_CLOSED=1,
+    NBCTRL_GETMAC,
     NBCTRL_CONNECTING,
     NBCTRL_CONNECTED,
     NBCTRL_SENDING,
@@ -31,7 +32,11 @@ typedef enum{
 }NbCtrlStatus_t;
 
 
-int nbIoTRestart(void);
+void nbIoTReset(void);
+
+int nbIoTGetMac(uint8_t mac[], uint16_t macBufferSize);
+
+int nbIoTConnecting(void);
 
 int nbIoTInit(const char ip[], uint16_t port);
 

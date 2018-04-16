@@ -111,7 +111,7 @@ static int dataRecv(NblockParse_t *recv, uint16_t timeOut_ms)
  */
 static int  transRecvHandlePkt(NblockFrame_t *framePtr, uint16_t timeOut_ms)
 {
-    uint16_t makePktLen, recvPktLen;
+    //uint16_t recvPktLen;
     int retFun;
 
 
@@ -161,7 +161,7 @@ static int  transRecvHandlePkt(NblockFrame_t *framePtr, uint16_t timeOut_ms)
 int nblockProtcl_upJoin(const void *dataPtr, NblockFrame_t *frame, uint16_t timeOut_ms)
 {
     int retFun;
-    uint8_t temp[64];
+    char temp[64];
     uint16_t tempIdx;
 
     LOGDEBUG(DEBUG, "Join Netwok\n");
@@ -317,6 +317,7 @@ int nblockProtcl_upOtaData(const void *dataPtr, NblockFrame_t *frame, uint16_t t
  * @see         
  * @note        
  */
+#if 0
 static int general_oneDataCmd(uint8_t cmd, uint8_t data, NblockFrame_t *frame, uint16_t timeOut_ms)
 {
     int retFun;
@@ -329,6 +330,7 @@ static int general_oneDataCmd(uint8_t cmd, uint8_t data, NblockFrame_t *frame, u
     retFun = transRecvHandlePkt(frame, timeOut_ms);
     return retFun;
 }
+#endif
 
 /*  
  * @brief      Response for open lock CMD

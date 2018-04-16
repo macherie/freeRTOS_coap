@@ -15,6 +15,9 @@
 #include "log.h"
 
 
+#define DEBUG 1
+
+
 typedef struct
 {
     int socket;
@@ -45,10 +48,10 @@ static int moduleIsReg(uint8_t reptTimes)
     reptTimes=reptTimes?reptTimes:1;
 
     do{
-        LOGDEBUG(1,"Check BC95 Is Registed\n");
+        LOGDEBUG(DEBUG,"Check BC95 Is Registed\n");
         retFun = bc95_isRegist();
         if (ATCMD_OK != retFun) {
-            nb_delay(2000);
+            nb_delay(4000);
             if (0 == --reptTimes) {
                 LOG("Registed Time Out");
                 return -1;
@@ -59,6 +62,35 @@ static int moduleIsReg(uint8_t reptTimes)
     return 0;
 }
 
+/*  
+ * @brief        
+ * @param[out]   
+ * @param[in]   
+ * @return       
+ * @see         
+ * @note        
+ */
+void nbIoTReset (void)
+{
+    CMDStatus_t retFun;
+
+    LOGDEBUG(DEBUG,"BC95 Reset\n");
+    
+    /* no echo */
+    bc95_noEcho();
+    
+    /* reset module */
+    retFun = bc95_rest();
+    if (0 != retFun){
+        nbIoTSetState(NBCTRL_NOCONNECTED);
+        LOG("Reset Module Error\n");
+        return;
+    }
+    /* no echo */
+    bc95_noEcho();
+
+    nbIoTSetState(NBCTRL_GETMAC);
+}
 
 /*  
  * @brief        
@@ -68,28 +100,47 @@ static int moduleIsReg(uint8_t reptTimes)
  * @see         
  * @note        
  */
- int nbIoTRestart(void)
- {
-    CMDStatus_t retFun;
-    int cnt = 0, retVal;
-
-    //nbIoTSetState(NBCTRL_NOTINITD);
+int nbIoTGetMac(uint8_t mac[], uint16_t macBufferSize)
+{
+    uint8_t temp[8];
+    uint8_t cnt = 0;
+    int retFun;
+    if (macBufferSize < 8){
+        LOG("Buffer too Small\n");
+        return -1;
+    }
+    
+    /* get module mac */
+    do{
+        retFun = bc95_serialNum(temp, sizeof(temp));
+        if (cnt++ > 3){
+            nbIoTSetState(NBCTRL_NOCONNECTED);
+            LOG("Get Mac Error\n");
+            if (retFun < 0){
+                nb_delay(2000);
+            }
+            return -1;
+        }
+    }while(0 > retFun);
+    memcpy(mac, temp, sizeof(temp));
 
     nbIoTSetState(NBCTRL_CONNECTING);
-    do{
-        LOGDEBUG(1,"Reset BC95 Module\n");
-        retFun = bc95_rest();
-        if (ATCMD_OK != retFun) {
-            nb_delay(2000);
-            if (cnt > 7) {
-                nbIoTSetState(NBCTRL_NOCONNECTED);
-                LOG("Reset Reapte Out\n");
-                return -1;
-            }
-        }
-    }while(ATCMD_OK != retFun);
 
-    bc95_noEcho();
+    return sizeof(temp);
+}
+
+/*  
+ * @brief        
+ * @param[out]   
+ * @param[in]   
+ * @return       
+ * @see         
+ * @note        
+ */
+ int nbIoTConnecting(void)
+ {
+    CMDStatus_t retFun;
+    int retVal;
 
     retVal = moduleIsReg(20);
     if (retVal != 0) {
@@ -98,7 +149,7 @@ static int moduleIsReg(uint8_t reptTimes)
         return -1;
     }
 
-    LOGDEBUG(1, "cgdcont Set\n");
+    LOGDEBUG(DEBUG, "cgdcont Set\n");
     retFun = bc95_cgdcontSet(1, "IP", DEFAULT_APN);
     if (ATCMD_OK != retFun) {
         nbIoTSetState(NBCTRL_NOCONNECTED);
@@ -107,7 +158,7 @@ static int moduleIsReg(uint8_t reptTimes)
     }
     
     nb_delay(500);
-    LOGDEBUG(1, "cgact Active\n");
+    LOGDEBUG(DEBUG, "cgact Active\n");
     retFun = bc95_cgact(0, 1);
     if (ATCMD_OK != retFun) {
         nbIoTSetState(NBCTRL_NOCONNECTED);
@@ -115,11 +166,11 @@ static int moduleIsReg(uint8_t reptTimes)
         return -1;
     }
 
-    LOGDEBUG(1, "CGP addr\n"); 
+    LOGDEBUG(DEBUG, "CGP addr\n"); 
     bc95_cgpaddr(0);
 
     /* Create Socket */
-    LOGDEBUG(1, "Create Socket\n"); 
+    LOGDEBUG(DEBUG, "Create Socket\n"); 
     retVal = bc95_socket(NULL, 5566);
     if (retVal < 0) {
         nbIoTSetState(NBCTRL_NOCONNECTED);
@@ -142,7 +193,7 @@ static int moduleIsReg(uint8_t reptTimes)
  */
 int nbIoTInit(const char ip[], uint16_t port)
 {
-    CMDStatus_t retFun;
+    int retFun;
 
     /* initialize uart */
     retFun = uartComm_init();

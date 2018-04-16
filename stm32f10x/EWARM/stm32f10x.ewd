@@ -777,7 +777,7 @@
                 </option>
                 <option>
                     <name>CCJLinkSpeedRadioV2</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>CCUSBDevice</name>
@@ -896,7 +896,7 @@
                 </option>
                 <option>
                     <name>CCSwoClockAuto</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>CCSwoClockEdit</name>

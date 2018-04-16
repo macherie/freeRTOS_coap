@@ -51,7 +51,8 @@
 #include "cmsis_os.h"
 
 #include "log.h"
-#include "uart_test.h"
+#include "coap_uart.h"
+#include "nbModule.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -69,12 +70,11 @@ osThreadId defaultTaskHandle;
 void SystemClock_Config(void);
 void StartDefaultTask(void const * argument);
 
-/* USER CODE BEGIN PFP */
-/* Private function prototypes -----------------------------------------------*/
 
+void cmdHandler(uint8_t cmd, const uint8_t data[], uint16_t dataLen);    /* ÃüÁî´¦Àíº¯Êý */
 
+void cmdErrHandler(uint8_t cmd);
 
-/* USER CODE END 0 */
 
 /**
   * @brief  The application entry point.
@@ -92,23 +92,16 @@ int main(void)
     /* printf debug uart initialize */
     priPrintfInit();
     LOG("=====================STM32 Restart===================\n");
-
-
+    
+    nbInit(cmdHandler, cmdErrHandler);
+  
     osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
     defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
-    TaskHandle_t handle;
-    if (xTaskCreate(test, "test", 1024, NULL, 2, &handle) != pdPASS){
-        LOG("create thread error\n");
-    }
-
-
     osKernelStart();
-  
-
-  while (1)
-  {
-  }
+    while (1)
+    {
+    }
 }
 
 /**
@@ -158,7 +151,7 @@ void SystemClock_Config(void)
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
   /* SysTick_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(SysTick_IRQn, 3, 3);
+  HAL_NVIC_SetPriority(SysTick_IRQn, 15, 0);
 }
 
 /* USER CODE BEGIN 4 */
@@ -173,7 +166,7 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    osDelay(1000);
   }
   /* USER CODE END 5 */ 
 }
@@ -211,12 +204,15 @@ void assert_failed(uint8_t* file, uint32_t line)
 }
 #endif /* USE_FULL_ASSERT */
 
-/**
-  * @}
-  */
 
-/**
-  * @}
-  */
+void cmdHandler(uint8_t cmd, const uint8_t data[], uint16_t dataLen)
+{
+    LOG("CMD Handler OK.\n");
+}
+
+void cmdErrHandler(uint8_t cmd)
+{
+    LOG("CMD Handler Error.\n");
+}
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

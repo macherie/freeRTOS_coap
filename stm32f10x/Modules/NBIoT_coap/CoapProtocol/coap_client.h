@@ -22,7 +22,7 @@ extern "C"
 
 int coapUriParseGetIp(const char uriStr[], char ip[], uint16_t ipSize);
 
-int coapClientSerial(uint8_t payload[], uint16_t payloadSize, int coapType, int method, uint8_t msgBuffer[], uint16_t msgSize);
+int coapClientSerial(uint8_t payload[], uint16_t payloadSize, coap_message_type_t coapType, int method, uint8_t msgBuffer[], uint16_t msgSize);
 
 int coapClientParse(uint8_t payload[], uint16_t payloadSize, uint8_t msgBuffer[], uint16_t msgSize);
 

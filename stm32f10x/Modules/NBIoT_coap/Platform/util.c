@@ -12,6 +12,8 @@
 #if defined (_unix_)
 #include <unistd.h>
 #include <sys/time.h>
+#elif defined (_FREERTOS_)
+
 #endif
 
 
@@ -36,6 +38,30 @@ void nb_delay(uint32_t delay_ms)
 #endif
 }
 
+/*  
+ * @brief      using select timedelay
+ * @param[out] None  
+ * @param[in]  delay_ms -- delay time 
+ * @return     None  
+ * @see         
+ * @note        
+ */
+void nb_sleep(uint32_t delay_ms)
+{
+#if defined (_unix_)
+  struct timeval tv;
+  tv.tv_sec = delay_ms / 1000;
+  tv.tv_usec = (delay_ms % 1000) * 1000;
+  select(0, NULL, NULL, NULL, &tv);
+#elif defined (_FREERTOS_)
+  while(delay_ms-- > 0){
+    int i;
+    for (i=0;i < 0xff;i++);
+  }
+#endif
+}
+
+#if 0
 /*  
  * @brief        
  * @param[out]   
@@ -74,6 +100,7 @@ int kmpCmp(const uint8_t t[], uint32_t tLen, const uint8_t p[], uint32_t pLen, i
 	/* TODO  */
 	return -1;
 }
+#endif
 
 /*  
  * @brief        
@@ -201,9 +228,10 @@ int mysscan_uint(const char str[], unsigned int *valuePtr)
 
 
 /*  
- * @brief        
- * @param[out]   
- * @param[in]   
+ * @brief      create thread
+ * @param[out] None
+ * @param[in]  threadId -- thread id pointer; threadFun -- function pointer;
+ *             arg -- arguments
  * @return       
  * @see         
  * @note        
@@ -214,7 +242,11 @@ int createThread(int32_t *threadId, ThreadFun_t threadFun, void *arg)
     pthread_t pthreadID;
 	return pthread_create(&pthreadID, NULL, threadFun, arg);
 #elif defined (_FREERTOS_)
-    return xTaskCreate(threadFun, "NBIoT", 1024, NULL, 2, NULL);
+    if (xTaskCreate(threadFun, "NBIoT", 1024, NULL, 2, NULL) != pdPASS)
+    {
+        return -1;
+    }
+    return 0;
 #endif
 }
 
@@ -232,7 +264,10 @@ int mutexInit(Mutex_t *mutex)
     vSemaphoreCreateBinary();
    return pthread_mutex_init(mutex, NULL);
 #elif defined (_FREERTOS_)
-   *mutex = vSemaphoreCreateBinary();
+   vSemaphoreCreateBinary(*mutex);
+   if (NULL == *mutex){
+        return -1;
+   }
    return 0;
 #endif
 }
@@ -250,7 +285,9 @@ int mutexLock(Mutex_t *mutex)
 #if defined (_unix_)
     return pthread_mutex_lock(mutex);
 #elif defined (_FREERTOS_)
-    if (xSemaphoreTake(*mutex, portMAX_DELAY) != )
+    if (xSemaphoreTake(*mutex, portMAX_DELAY) != pdPASS){
+        return -1;
+    }
     return 0;
 #endif
 }
@@ -269,7 +306,11 @@ int mutexUnlock(Mutex_t *mutex)
 #if defined (_unix_)
     return pthread_mutex_unlock(mutex);
 #elif defined (_FREERTOS_)
-    
+    if (xSemaphoreGive(*mutex) != pdPASS)
+    {
+        return -1;
+    }
+    return 0;
 #endif
 }
 

@@ -19,13 +19,13 @@ extern "C"
 
 
 #define NBLOCK_PROTCL_HEADER_SIZE   (18)
-#define NBLOCK_PROTCL_PAYLOAD_SIZE  (110)
+#define NBLOCK_PROTCL_PAYLOAD_SIZE  (64)
 #define NBLOCK_RESPDATA_SIZE        NBLOCK_PROTCL_PAYLOAD_SIZE
-#define SERIAL_PARSE_BUFFER_SIZE    (256)
+#define SERIAL_PARSE_BUFFER_SIZE    (128)
 
 #define URI_IP                      "101.132.153.33"
 #define URI_PORT                    "5566"
-#define URI_IP_PORT					        "coap://"URI_IP":"URI_PORT
+#define URI_IP_PORT					"coap://"URI_IP":"URI_PORT
 
 
 /* NBIoT 私有协议CMD */

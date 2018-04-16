@@ -358,6 +358,7 @@
                     <state>$PROJ_DIR$\..\Modules\NBIoT_coap\BC95</state>
                     <state>$PROJ_DIR$\..\Modules\NBIoT_coap\CoapProtocol</state>
                     <state>$PROJ_DIR$\..\Modules\NBIoT_coap\Platform</state>
+                    <state>$PROJ_DIR$\..\Modules\NBIoT_coap</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -1160,16 +1161,43 @@
         <group>
             <name>NBIoT</name>
             <file>
+                <name>$PROJ_DIR$\..\Modules\NBIoT_coap\BC95\bc95Module.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Modules\NBIoT_coap\CoapProtocol\coap_client.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Modules\NBIoT_coap\CoapProtocol\coap_list.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Modules\NBIoT_coap\Platform\coap_uart.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Modules\NBIoT_coap\Platform\crc_cal.c</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Modules\NBIoT_coap\CoapProtocol\er-coap-13.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Modules\NBIoT_coap\Platform\myRingQueue.c</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Modules\NBIoT_coap\BC95\nbiotCtrl.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Modules\NBIoT_coap\CoapProtocol\nblockProtcl.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Modules\NBIoT_coap\nbModule.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Modules\NBIoT_coap\CoapProtocol\nbProtclExam.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Modules\NBIoT_coap\Platform\uartComm.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Modules\NBIoT_coap\CoapProtocol\uri.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Modules\NBIoT_coap\Platform\util.c</name>

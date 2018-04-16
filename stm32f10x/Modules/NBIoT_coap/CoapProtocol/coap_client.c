@@ -31,7 +31,7 @@ typedef struct
 
 
 static CoapClientCtx_t gCtx;
-static uint8_t gUdpRecvBuffer[256];
+//static uint8_t gUdpRecvBuffer[256];
 
 
 /*  
@@ -45,7 +45,7 @@ static uint8_t gUdpRecvBuffer[256];
  int coapUriParseGetIp(const char uriStr[], char ip[], uint16_t ipSize)
 {
 	coap_uri_t *uri = NULL;
-    int retVal = 0, retFun;
+    int retVal = 0;
 
 	if (NULL == uriStr) {
 		LOG("No URI String\n");
@@ -82,7 +82,7 @@ static uint8_t gUdpRecvBuffer[256];
  * @see         
  * @note        
  */
- int coapClientSerial(uint8_t payload[], uint16_t payloadSize, int coapType, int method, uint8_t msgBuffer[], uint16_t msgSize)
+ int coapClientSerial(uint8_t payload[], uint16_t payloadSize, coap_message_type_t coapType, int method, uint8_t msgBuffer[], uint16_t msgSize)
 {
 	if (payloadSize > COAP_MAX_HEADER_SIZE)
 	{

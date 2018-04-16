@@ -49,11 +49,13 @@ void coapUartInit(uint32_t baud)
  */
 int coapUartSend(uint8_t data[], uint16_t dataLen)
 {
-	if (HAL_UART_Transmit(&UartHandle, data, dataLen, 0xffff) != HAL_OK);
+    int retVal = dataLen;
+    
+	if (HAL_UART_Transmit(&UartHandle, data, dataLen, 0xffff) != HAL_OK)
 	{
 		return 0;
 	}
-	return dataLen;
+    return retVal;
 }
 
 /*  
@@ -66,7 +68,7 @@ int coapUartSend(uint8_t data[], uint16_t dataLen)
  */
 int coapUartRecv(uint8_t data[], uint16_t size)
 {
-	if (HAL_UART_Receive(&UartHandle, data, size, 0xff) != HAL_OK)
+	if (HAL_UART_Receive(&UartHandle, data, size, 0xf) != HAL_OK)
 	{
 		return 0;
 	}

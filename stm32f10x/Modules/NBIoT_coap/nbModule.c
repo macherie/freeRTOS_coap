@@ -84,19 +84,32 @@ static NblockFrame_t gFrame;
  * @see         
  * @note        
  */
+#if defined (_unix_)
 static void *nbProcess(void *arg)
+#elif defined (_FREERTOS_)
+static void nbProcess(void *arg)
+#endif
 {
     int state;
+    uint8_t mac[8];
 
     for (;;) {
         state = nbIoTGetState();
         switch(state){
             case NBCTRL_CLOSED:
-	                nbIoTRestart();                /* restart NBIoT Module */
+                    nbIoTReset();
+                    break;
+            case NBCTRL_GETMAC:
+                    if (nbIoTGetMac(mac, sizeof(mac)) == 0){
+                        nblockProtclInit(mac, sizeof(mac));
+                    }
+                    break;
+            case NBCTRL_CONNECTING:
+                    nbIoTConnecting();
                     break;
             case NBCTRL_CONNECTED: 
                     if (1 == gCtx.operate){
-                        cmdHandler();              /* cmd Message Handler */
+                        cmdHandler();               /* cmd Message Handler */
                         mutexLock(&gCtx.mutex);
                         gCtx.operate = 0;
                         mutexUnlock(&gCtx.mutex);
@@ -114,9 +127,8 @@ static void *nbProcess(void *arg)
             mutexUnlock(&gCtx.mutex);
             nbIoTSetState(NBCTRL_CLOSED);  
         }
-        nb_delay(10); 
+        nb_delay(100); 
     }
-    return NULL;
 }
 
 /*  
@@ -130,7 +142,6 @@ static void *nbProcess(void *arg)
 int nbInit(CmdHandlerFunc_t handler, CmdErrHandlerFunc_t errHandler)
 {
     int retFun;
-	uint8_t mac[8];
 
     if (NULL == handler || NULL == errHandler){
         LOG("No Callback Function\n");
@@ -146,19 +157,6 @@ int nbInit(CmdHandlerFunc_t handler, CmdErrHandlerFunc_t errHandler)
 		return -2;
 	}
 
-	/* Get Module Mac */
-	retFun = bc95_serialNum(mac, sizeof(mac));
-	if (retFun < 1){
-		LOG("Get Module mac Error\n");
-		return -3;
-	}
-
-	/* Protocol Initialize */
-	retFun = nblockProtclInit(mac, retFun);
-	if (retFun < 0){
-		LOG("NB Protocol Initialize Error\n");
-		return -4;
-	}
     /* create mutex */
     retFun = mutexInit(&gCtx.mutex);
     if (0 != retFun){
